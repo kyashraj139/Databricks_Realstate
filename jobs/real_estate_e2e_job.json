@@ -1,0 +1,82 @@
+{
+  "name": "real_estate_e2e_lakehouse_pipeline",
+  "parameters": [
+    {
+      "name": "catalog_name",
+      "default": "real_estate_prod"
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "shared_e2e_cluster",
+      "new_cluster": {
+        "spark_version": "15.4.x-cpu-ml-scala2.12",
+        "node_type_id": "Standard_DS3_v2",
+        "num_workers": 2,
+        "data_security_mode": "SINGLE_USER"
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "task_key": "01_setup_and_dummy_data",
+      "job_cluster_key": "shared_e2e_cluster",
+      "notebook_task": {
+        "notebook_path": "projects/real_estate/notebooks/01_setup_unity_catalog_and_dummy_data.ipynb",
+        "source": "GIT"
+      }
+    },
+    {
+      "task_key": "02_bronze_ingestion",
+      "depends_on": [
+        {
+          "task_key": "01_setup_and_dummy_data"
+        }
+      ],
+      "job_cluster_key": "shared_e2e_cluster",
+      "notebook_task": {
+        "notebook_path": "projects/real_estate/notebooks/02_bronze_ingestion.ipynb",
+        "source": "GIT"
+      }
+    },
+    {
+      "task_key": "03_silver_transformation",
+      "depends_on": [
+        {
+          "task_key": "02_bronze_ingestion"
+        }
+      ],
+      "job_cluster_key": "shared_e2e_cluster",
+      "notebook_task": {
+        "notebook_path": "projects/real_estate/notebooks/03_silver_transformation.ipynb",
+        "source": "GIT"
+      }
+    },
+    {
+      "task_key": "04_gold_business_and_dashboards",
+      "depends_on": [
+        {
+          "task_key": "03_silver_transformation"
+        }
+      ],
+      "job_cluster_key": "shared_e2e_cluster",
+      "notebook_task": {
+        "notebook_path": "projects/real_estate/notebooks/04_gold_business_and_dashboards.ipynb",
+        "source": "GIT"
+      }
+    },
+    {
+      "task_key": "05_ml_training_and_mlflow",
+      "depends_on": [
+        {
+          "task_key": "04_gold_business_and_dashboards"
+        }
+      ],
+      "job_cluster_key": "shared_e2e_cluster",
+      "notebook_task": {
+        "notebook_path": "projects/real_estate/notebooks/05_ml_training_and_mlflow.ipynb",
+        "source": "GIT"
+      }
+    }
+  ]
+}
